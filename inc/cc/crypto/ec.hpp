@@ -1,11 +1,11 @@
 #pragma once
-#include "../types.hpp"
-#include "../utils/bytes.hpp"
+#include "types.hpp"
+#include "utils/bytes.hpp"
 #include <memory>
 #include <string>
 #include <utility>
 
-namespace cssl {
+namespace cc::crypto {
 class EcSignature {
     friend class Ec;
 public:

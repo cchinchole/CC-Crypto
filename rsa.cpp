@@ -1,14 +1,14 @@
 #include "internal/rsa.hpp"
-#include "inc/math/primes.hpp"
-#include "inc/utils/bytes.hpp"
-#include "inc/utils/logger.hpp"
-#include "inc/utils/time.hpp"
-#include "inc/hash/hash.hpp"
+#include "cc/crypto/primes.hpp"
+#include "cc/crypto/utils/bytes.hpp"
+#include "cc/crypto/utils/logger.hpp"
+#include "cc/crypto/utils/time.hpp"
+#include "cc/crypto/hash.hpp"
 #include <openssl/bn.h>
 #include <openssl/rand.h>
 #include <stdio.h>
 
-using namespace cssl;
+using namespace cc::crypto;
 
 // Make sure that k = (k^e)^d mod n ; for some int k where 1 < k < n-1
 // gen_rsa_sp800_56b
@@ -185,7 +185,7 @@ std::vector<uint8_t> rsa_mgf1(std::span<const uint8_t> seed, size_t maskLen,
         T.push_back(static_cast<uint8_t>((counter >> 8) & 0xFF));
         T.push_back(static_cast<uint8_t>((counter & 0xFF)));
 
-        std::vector<uint8_t> hash = cssl::Hasher::hash(T, shaMode);
+        std::vector<uint8_t> hash = cc::crypto::Hasher::hash(T, shaMode);
         mask.insert(mask.end(), hash.begin(), hash.end());
 
         counter++;
@@ -346,7 +346,7 @@ ByteArray rsa_oaep_encode(RsaKey& key, std::span<const uint8_t> msg)
     const size_t len_modulus = key.modulus_bits_ / 8;
 
     // Step A
-    ByteArray label_hash = cssl::Hasher::hash(key.padding_.label, key.padding_.label_hash_mode);
+    ByteArray label_hash = cc::crypto::Hasher::hash(key.padding_.label, key.padding_.label_hash_mode);
 
     const size_t len_hash = label_hash.size();
 
@@ -410,7 +410,7 @@ ByteArray rsa_oaep_decode(RsaKey& key, std::span<const uint8_t> em)
     const size_t len_modulus = key.modulus_bits_ / 8;
 
     // Step A
-    ByteArray hashed_label = cssl::Hasher::hash(key.padding_.label, key.padding_.label_hash_mode);
+    ByteArray hashed_label = cc::crypto::Hasher::hash(key.padding_.label, key.padding_.label_hash_mode);
 
     const size_t len_hash = hashed_label.size();
     bool decryption_error = false;

@@ -1,8 +1,8 @@
-#include "../inc/hash/hash.hpp"
+#include "cc/crypto/hash.hpp"
 #include "../internal/hmac.hpp"
 #include "../internal/sha.hpp"
 
-namespace cssl
+namespace cc::crypto
 {
 class Hasher::Impl
 {

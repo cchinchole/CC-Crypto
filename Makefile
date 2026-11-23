@@ -2,7 +2,7 @@
 DEBUG = 0
 OPT_LEVEL = 3
 CXX = g++
-CXXFLAGS = -std=c++23 -g -O$(OPT_LEVEL) -DDEBUG=$(DEBUG) -fdiagnostics-color=always
+CXXFLAGS = -std=c++23 -g -O$(OPT_LEVEL) -DDEBUG=$(DEBUG) -fdiagnostics-color=always -Iinc
 LDFLAGS =
 
 
@@ -26,7 +26,7 @@ BUILD_DIR = build
 LIB_DIR = .
 EXAMPLES_DIR = examples
 PREFIX ?= /usr/local
-INSTALLINCLUDEDIR = $(PREFIX)/include/cssl
+INSTALLINCLUDEDIR = $(PREFIX)/include/cc
 INSTALLLIBDIR = $(PREFIX)/lib
 TEST_DIRS = tests/aes tests/ecdsa_siggen tests/ecdsa_sigverif tests/hash tests/shake tests/hmac tests/rsa_oaep tests/rsa_decryption tests/primes
 
@@ -74,14 +74,15 @@ clean:
 	$(MAKE) -C tests/primes clean
 install: all
 	install -d $(INSTALLINCLUDEDIR)
-	cp -r ./inc/* $(INSTALLINCLUDEDIR)/
+	cp -r ./inc/cc/crypto ./inc/cc/crypto.hpp $(INSTALLINCLUDEDIR)/
 	install -d $(INSTALLLIBDIR)
 	install -m 755 $(SHARED_LIB) $(INSTALLLIBDIR)
 	install -m 644 $(STATIC_LIB) $(INSTALLLIBDIR)
 uninstall:
 	rm -f $(INSTALLLIBDIR)/libcssl.so
 	rm -f $(INSTALLLIBDIR)/libcssl.a
-	rm -rf $(INSTALLINCLUDEDIR)
+	rm -rf $(INSTALLINCLUDEDIR)/crypto $(INSTALLINCLUDEDIR)/crypto.hpp
+	-rmdir $(INSTALLINCLUDEDIR) 2>/dev/null
 test: all
 	@for dir in $(TEST_DIRS); do \
 		$(MAKE) -C $$dir run; \

@@ -1,6 +1,6 @@
-#include "../../inc/cssl.hpp"
+#include "cc/crypto.hpp"
 #include "../common/jsonParser.hpp"
-#include "utils/logger.hpp"
+#include "cc/crypto/utils/logger.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -9,30 +9,30 @@
 #include <string>
 #include <vector>
 
-using namespace cssl::Parser;
+using namespace cc::crypto::Parser;
 
-cssl::DIGEST_MODE sha_name(const std::string& s) {
-    static const std::unordered_map<std::string, cssl::DIGEST_MODE> sha_map = {
-        {"HMACSHA1", cssl::DIGEST_MODE::SHA_1},
-        {"HMACSHA224", cssl::DIGEST_MODE::SHA_224},
-        {"HMACSHA256", cssl::DIGEST_MODE::SHA_256},
-        {"HMACSHA384", cssl::DIGEST_MODE::SHA_384},
-        {"HMACSHA512", cssl::DIGEST_MODE::SHA_512},
-        {"HMACSHA3-224", cssl::DIGEST_MODE::SHA_3_224},
-        {"HMACSHA3-256", cssl::DIGEST_MODE::SHA_3_256},
-        {"HMACSHA3-384", cssl::DIGEST_MODE::SHA_3_384},
-        {"HMACSHA3-512", cssl::DIGEST_MODE::SHA_3_512},
+cc::crypto::DIGEST_MODE sha_name(const std::string& s) {
+    static const std::unordered_map<std::string, cc::crypto::DIGEST_MODE> sha_map = {
+        {"HMACSHA1", cc::crypto::DIGEST_MODE::SHA_1},
+        {"HMACSHA224", cc::crypto::DIGEST_MODE::SHA_224},
+        {"HMACSHA256", cc::crypto::DIGEST_MODE::SHA_256},
+        {"HMACSHA384", cc::crypto::DIGEST_MODE::SHA_384},
+        {"HMACSHA512", cc::crypto::DIGEST_MODE::SHA_512},
+        {"HMACSHA3-224", cc::crypto::DIGEST_MODE::SHA_3_224},
+        {"HMACSHA3-256", cc::crypto::DIGEST_MODE::SHA_3_256},
+        {"HMACSHA3-384", cc::crypto::DIGEST_MODE::SHA_3_384},
+        {"HMACSHA3-512", cc::crypto::DIGEST_MODE::SHA_3_512},
     };
     
     auto it = sha_map.find(s);
-    return it != sha_map.end() ? it->second : cssl::DIGEST_MODE::NONE;
+    return it != sha_map.end() ? it->second : cc::crypto::DIGEST_MODE::NONE;
 }
 
 // Returns 1 on success
 uint8_t runTestCase(const TestVector &vector, const TestGroup &group, const TestCase &test)
 {
     uint8_t retCode = 0;
-    cssl::DIGEST_MODE mode = sha_name(vector.algorithm);
+    cc::crypto::DIGEST_MODE mode = sha_name(vector.algorithm);
     ByteArray msg = hex_to_bytes(test.params.at("msg").get<std::string>());
     ByteArray key = hex_to_bytes(test.params.at("key").get<std::string>());
     ByteArray tag = hex_to_bytes(test.params.at("tag").get<std::string>());
@@ -40,7 +40,7 @@ uint8_t runTestCase(const TestVector &vector, const TestGroup &group, const Test
 
     bool expectedPass = false;
 
-    ByteArray digestOutput = cssl::Hasher::hmac(msg, key, mode);
+    ByteArray digestOutput = cc::crypto::Hasher::hmac(msg, key, mode);
     //Truncate
     digestOutput.resize(tag.size());
 

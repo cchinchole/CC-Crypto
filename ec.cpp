@@ -1,7 +1,7 @@
 #include "internal/ec.hpp"
-#include "inc/types.hpp"
-#include "inc/utils/bytes.hpp"
-#include "inc/hash/hash.hpp"
+#include "cc/crypto/types.hpp"
+#include "cc/crypto/utils/bytes.hpp"
+#include "cc/crypto/hash.hpp"
 
 #include <assert.h>
 
@@ -56,7 +56,7 @@ Generate:
 /* FIPS 186-5 6.4.1 */
 int ec_generate_signature(EcKey &key, cEcSignature &sig,
                                        ByteSpan msg,
-                                       cssl::DIGEST_MODE shaMode,
+                                       cc::crypto::DIGEST_MODE shaMode,
                                        char *kSecret)
 {
     int retcode = -1;
@@ -74,7 +74,7 @@ int ec_generate_signature(EcKey &key, cEcSignature &sig,
     int len_modulus = 0;
     int len_hash = 0;
 
-    if(shaMode==cssl::DIGEST_MODE::SHA_3_SHAKE_128 || shaMode==cssl::DIGEST_MODE::SHA_3_SHAKE_256)
+    if(shaMode==cc::crypto::DIGEST_MODE::SHA_3_SHAKE_128 || shaMode==cc::crypto::DIGEST_MODE::SHA_3_SHAKE_256)
     {
         // Invalid hash function
         retcode = 10;
@@ -82,7 +82,7 @@ int ec_generate_signature(EcKey &key, cEcSignature &sig,
     }
 
     // Step 1 - 2
-    hash = cssl::Hasher::hash(msg, shaMode);
+    hash = cc::crypto::Hasher::hash(msg, shaMode);
     len_modulus = BN_num_bits(group->n_); /* N = len(n) */
     len_hash = hash.size() * 8;
 
@@ -142,7 +142,7 @@ ending:
 /* FIPS 186-5 6.4.2 */
 int ec_verify_signature(EcKey &key, cEcSignature &sig,
                                      ByteSpan msg,
-                                     cssl::DIGEST_MODE shaMode)
+                                     cc::crypto::DIGEST_MODE shaMode)
 {
     int retcode = -1;
 
@@ -165,7 +165,7 @@ int ec_verify_signature(EcKey &key, cEcSignature &sig,
     int len_modulus = 0;
     int len_hash = 0;
 
-    if(shaMode==cssl::DIGEST_MODE::SHA_3_SHAKE_128 || shaMode==cssl::DIGEST_MODE::SHA_3_SHAKE_256)
+    if(shaMode==cc::crypto::DIGEST_MODE::SHA_3_SHAKE_128 || shaMode==cc::crypto::DIGEST_MODE::SHA_3_SHAKE_256)
     {
         // Invalid hash function
         retcode = 10;
@@ -173,7 +173,7 @@ int ec_verify_signature(EcKey &key, cEcSignature &sig,
     }
         
     // Step 2 - 3: Hash the message
-    hash = cssl::Hasher::hash(msg, shaMode);
+    hash = cc::crypto::Hasher::hash(msg, shaMode);
 
     if (BN_is_zero(sig.r_) || BN_is_zero(sig.s_) || BN_ucmp(sig.r_, d_group->n_) >= 0 || BN_ucmp(sig.s_, d_group->n_) >= 0)
     {
@@ -249,7 +249,7 @@ cEcSignature::cEcSignature()
     s_ = BN_new();
 }
 
-EcKey::EcKey(cssl::EC_GROUP group)
+EcKey::EcKey(cc::crypto::EC_GROUP group)
 {
     this->group_ = group;
     this->priv_ = BN_secure_new();
@@ -532,20 +532,20 @@ void ECScalarMult(cECPrimeField *g,
 }
 */
 
-std::string ec_group_string(cssl::EC_GROUP group)
+std::string ec_group_string(cc::crypto::EC_GROUP group)
 {
     switch (group)
     {
-        case cssl::EC_GROUP::P224:
+        case cc::crypto::EC_GROUP::P224:
         return "P-224";
         break;
-        case cssl::EC_GROUP::P256:
+        case cc::crypto::EC_GROUP::P256:
         return "P-256";
         break;
-        case cssl::EC_GROUP::P384:
+        case cc::crypto::EC_GROUP::P384:
         return "P-384";
         break;
-        case cssl::EC_GROUP::P521:
+        case cc::crypto::EC_GROUP::P521:
         return "P-521";
         break;
     default:
@@ -575,7 +575,7 @@ class CurveRegistry
                     "ffffffffffffffffffffffffffff16a2e0b8f03e13dd29455c5c2a3d",
                     "b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21",
                     "bd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34",
-                    cssl::EC_GROUP::P224);
+                    cc::crypto::EC_GROUP::P224);
             }
             else if (curveName == "P-256")
             {
@@ -592,7 +592,7 @@ class CurveRegistry
                     "98c296",
                     "4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837"
                     "bf51f5",
-                    cssl::EC_GROUP::P256);
+                    cc::crypto::EC_GROUP::P256);
             }
             else if (curveName == "P-521")
             {
@@ -615,7 +615,7 @@ class CurveRegistry
                     "011839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd"
                     "17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c240"
                     "88be94769fd16650",
-                    cssl::EC_GROUP::P521);
+                    cc::crypto::EC_GROUP::P521);
             }
             else if (curveName == "P-384")
             {
@@ -632,7 +632,7 @@ class CurveRegistry
                     "542a385502f25dbf55296c3a545e3872760ab7",
                     "3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5"
                     "f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f",
-                    cssl::EC_GROUP::P384);
+                    cc::crypto::EC_GROUP::P384);
             }
             else
             {

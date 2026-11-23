@@ -1,7 +1,7 @@
-#include "../inc/math/primes.hpp"
+#include "cc/crypto/primes.hpp"
 #include "../internal/primes.hpp"
 
-namespace cssl
+namespace cc::crypto
 {
 bool check_if_prime(BIGNUM *w)
 {

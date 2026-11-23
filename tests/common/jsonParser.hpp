@@ -1,5 +1,5 @@
-#include "../../inc/utils/json.hpp"
-#include "../../inc/utils/logger.hpp"
+#include "cc/crypto/utils/json.hpp"
+#include "cc/crypto/utils/logger.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -12,7 +12,7 @@ using ParamMap = std::map<std::string, nlohmann::json>;
 #define CSSL_TEST_SKIPPED 1
 #define CSSL_TEST_FAILED 255
 
-namespace cssl
+namespace cc::crypto
 {
 namespace Parser
 {
@@ -190,4 +190,4 @@ uint8_t startTests(const std::string &path, const std::string &extension, uint8_
     return retCode;
 }
 } // namespace Parser
-} // namespace cssl
+} // namespace cc::crypto

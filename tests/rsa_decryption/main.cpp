@@ -1,4 +1,4 @@
-#include "../../inc/cssl.hpp"
+#include "cc/crypto.hpp"
 #include "../common/jsonParser.hpp"
 #include <cstring>
 #include <fstream>
@@ -168,7 +168,7 @@ int main()
         for (const auto &t : ch.tests)
         {
             totalTests++;
-            cssl::Rsa rsa(kBits);
+            cc::crypto::Rsa rsa(kBits);
             if (t.n.empty() || t.d.empty())
             {
                 totalSkipped++;

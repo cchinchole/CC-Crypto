@@ -1,5 +1,5 @@
 #include "internal/primes.hpp"
-#include "inc/utils/logger.hpp"
+#include "cc/crypto/utils/logger.hpp"
 #include <math.h>
 #include <openssl/bio.h>
 #include <openssl/bn.h>

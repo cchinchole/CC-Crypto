@@ -7,7 +7,7 @@
 #include <string>
 
 #include "cstring"
-#include "inc/utils/logger.hpp"
+#include "cc/crypto/utils/logger.hpp"
 
 /* FIPS 197 5.1.1 table 4 */
 constexpr static uint8_t kSbox[256] = {
@@ -588,23 +588,23 @@ ByteArray aes_encrypt(AesContext &ctx, ByteSpan buf)
     output.resize(buf.size());
     switch (ctx.mode_)
     {
-    case cssl::AES_MODE::CBC:
+    case cc::crypto::AES_MODE::CBC:
         aes_cbc_encrypt(ctx, output.data(), buf.data(), buf.size());
         break;
 
-    case cssl::AES_MODE::ECB:
+    case cc::crypto::AES_MODE::ECB:
         aes_ecb_encrypt(ctx, output.data(), buf.data(), buf.size());
         break;
 
-    case cssl::AES_MODE::CTR:
+    case cc::crypto::AES_MODE::CTR:
         aes_ctr_xcrypt(ctx, output.data(), buf.data(), buf.size());
         break;
 
-    case cssl::AES_MODE::OFB:
+    case cc::crypto::AES_MODE::OFB:
         aes_ofb_xcrypt(ctx, output.data(), buf.data(), buf.size());
         break;
 
-    case cssl::AES_MODE::CFB:
+    case cc::crypto::AES_MODE::CFB:
         aes_cfb_xcrypt(ctx, output.data(), buf.data(), buf.size());
         break;
 
@@ -622,23 +622,23 @@ ByteArray aes_decrypt(AesContext &ctx, ByteSpan buf)
     output.resize(buf.size());
     switch (ctx.mode_)
     {
-    case cssl::AES_MODE::CBC:
+    case cc::crypto::AES_MODE::CBC:
         aes_cbc_decrypt(ctx, output.data(), buf.data(), buf.size());
         break;
 
-    case cssl::AES_MODE::ECB:
+    case cc::crypto::AES_MODE::ECB:
         aes_ecb_decrypt(ctx, output.data(), buf.data(), buf.size());
         break;
 
-    case cssl::AES_MODE::CTR:
+    case cc::crypto::AES_MODE::CTR:
         aes_ctr_xcrypt(ctx, output.data(), buf.data(), buf.size());
         break;
 
-    case cssl::AES_MODE::OFB:
+    case cc::crypto::AES_MODE::OFB:
         aes_ofb_xcrypt(ctx, output.data(), buf.data(), buf.size());
         break;
 
-    case cssl::AES_MODE::CFB:
+    case cc::crypto::AES_MODE::CFB:
         aes_cfb_xcrypt(ctx, output.data(), buf.data(), buf.size());
         break;
 

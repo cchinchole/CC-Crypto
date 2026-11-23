@@ -1,4 +1,4 @@
-#include "../../inc/cssl.hpp"
+#include "cc/crypto.hpp"
 #include "../common/jsonParser.hpp"
 #include <filesystem>
 #include <format>
@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-using namespace cssl::Parser;
+using namespace cc::crypto::Parser;
 
 // Returns 1 on success
 uint8_t runTestCase(const TestVector &vector, const TestGroup &group, const TestCase &test)
@@ -27,7 +27,7 @@ uint8_t runTestCase(const TestVector &vector, const TestGroup &group, const Test
     }
 
     BIGNUM *check = hex_to_bignum(value);
-    passed = cssl::check_if_prime(check);
+    passed = cc::crypto::check_if_prime(check);
     BN_free(check);
     if (result == "valid" || result == "acceptable")
         expectedPass = true;

@@ -2,7 +2,7 @@
 #include <openssl/bn.h>
 #include <stdio.h>
 #include <memory.h>
-#include "../inc/types.hpp"
+#include "cc/crypto/types.hpp"
 
 constexpr int kSha1BlockSizeBytes = 64;
 constexpr int kSha256BlockSizeBytes = 64;
@@ -44,7 +44,7 @@ class ShaContext
 private:
 public:
     uint64_t block_cursor_ = 0;
-    cssl::DIGEST_MODE mode_ = cssl::DIGEST_MODE::SHA_1;
+    cc::crypto::DIGEST_MODE mode_ = cc::crypto::DIGEST_MODE::SHA_1;
     void* ph_;
     void* pmsg_len_;
     void* pblock_;
@@ -78,7 +78,7 @@ private:
     uint8_t block_[kSha256BlockSizeBytes];
 
 public:
-    Sha256Context(cssl::DIGEST_MODE mode);
+    Sha256Context(cc::crypto::DIGEST_MODE mode);
     void clear();
 };
 
@@ -89,7 +89,7 @@ private:
     uint8_t block_[kSha512BlockSizeBytes];
     uint64_t h_[8];
 public:
-    Sha512Context(cssl::DIGEST_MODE mode);
+    Sha512Context(cc::crypto::DIGEST_MODE mode);
     void clear();
 };
 
@@ -106,14 +106,14 @@ public:
         uint64_t words[kSha3SpongeArr][kSha3SpongeArr];
     } sponge_;
 
-    Sha3Context(cssl::DIGEST_MODE mode);
+    Sha3Context(cc::crypto::DIGEST_MODE mode);
     void clear();
 };
 
-ShaContext *sha_new_context(cssl::DIGEST_MODE mode);
-int get_block_length(cssl::DIGEST_MODE mode);
-int get_return_length(cssl::DIGEST_MODE mode);
-char *sha_mode_name(cssl::DIGEST_MODE mode);
+ShaContext *sha_new_context(cc::crypto::DIGEST_MODE mode);
+int get_block_length(cc::crypto::DIGEST_MODE mode);
+int get_return_length(cc::crypto::DIGEST_MODE mode);
+char *sha_mode_name(cc::crypto::DIGEST_MODE mode);
 void sha3_shake_digest_bytes(ShaContext *ctx_raw, size_t digestBytes);
 
 int sha1_update(const uint8_t *msg, size_t byMsg_len, ShaContext *ctx);

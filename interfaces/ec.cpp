@@ -1,9 +1,9 @@
-#include "../inc/crypto/ec.hpp"
+#include "cc/crypto/ec.hpp"
 #include "../internal/ec.hpp"
 #include <memory>
 #include <openssl/bn.h>
 
-namespace cssl
+namespace cc::crypto
 {
 struct EcSignature::Impl
 {

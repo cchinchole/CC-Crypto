@@ -1,10 +1,10 @@
-#include "../inc/crypto/rsa.hpp"
+#include "cc/crypto/rsa.hpp"
 #include "../internal/rsa.hpp"
-#include "../inc/utils/bytes.hpp"
+#include "cc/crypto/utils/bytes.hpp"
 #include <openssl/bn.h>
 
 
-namespace cssl {
+namespace cc::crypto {
 
     struct Rsa::Impl {
         RsaKey ctx;

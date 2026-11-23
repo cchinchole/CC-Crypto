@@ -1,5 +1,5 @@
 #pragma once
-namespace cssl {
+namespace cc::crypto {
 enum class DIGEST_MODE {
     SHA_1,
     SHA_224,

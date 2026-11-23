@@ -1,5 +1,5 @@
 #include "internal/sha.hpp"
-#include "inc/types.hpp"
+#include "cc/crypto/types.hpp"
 #include <assert.h>
 
 constexpr static uint32_t kSha1H0[5] = {0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0};
@@ -22,20 +22,20 @@ constexpr static uint64_t kSha512H0[8] = {0x6a09e667f3bcc908, 0xbb67ae8584caa73b
                                           0xa54ff53a5f1d36f1, 0x510e527fade682d1, 0x9b05688c2b3e6c1f,
                                           0x1f83d9abfb41bd6b, 0x5be0cd19137e2179};
 
-Sha3Context::Sha3Context(cssl::DIGEST_MODE mode)
+Sha3Context::Sha3Context(cc::crypto::DIGEST_MODE mode)
 {
     mode_ = mode;
     switch (mode) {
-    case cssl::DIGEST_MODE::SHA_3_224:
+    case cc::crypto::DIGEST_MODE::SHA_3_224:
         this->digest_bytes_ = 224 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_3_256:
+    case cc::crypto::DIGEST_MODE::SHA_3_256:
         this->digest_bytes_ = 256 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_3_384:
+    case cc::crypto::DIGEST_MODE::SHA_3_384:
         this->digest_bytes_ = 384 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_3_512:
+    case cc::crypto::DIGEST_MODE::SHA_3_512:
         this->digest_bytes_ = 512 / 8;
         break;
     default:
@@ -45,10 +45,10 @@ Sha3Context::Sha3Context(cssl::DIGEST_MODE mode)
     memset(&sponge_, 0, sizeof(sponge_));
     this->block_cursor_ = 0;
     switch (mode) {
-    case cssl::DIGEST_MODE::SHA_3_SHAKE_128:
+    case cc::crypto::DIGEST_MODE::SHA_3_SHAKE_128:
         r_ = 1344 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_3_SHAKE_256:
+    case cc::crypto::DIGEST_MODE::SHA_3_SHAKE_256:
         r_ = 1088 / 8;
         break;
     default:
@@ -79,7 +79,7 @@ Sha1Context::Sha1Context()
     ph_ = &h_;
     pblock_ = &block_;
 
-    mode_ = cssl::DIGEST_MODE::SHA_1;
+    mode_ = cc::crypto::DIGEST_MODE::SHA_1;
     msglen_ = 0;
     block_cursor_ = 0;
     memset(block_, 0, kSha1BlockSizeBytes);
@@ -94,7 +94,7 @@ void Sha1Context::clear()
     }
 }
 
-Sha256Context::Sha256Context(cssl::DIGEST_MODE mode)
+Sha256Context::Sha256Context(cc::crypto::DIGEST_MODE mode)
 {
     /* Set the pointers */
     pmsg_len_ = &msglen_;
@@ -110,10 +110,10 @@ void Sha256Context::clear()
     memset(block_, 0, kSha256BlockSizeBytes);
     for (int i = 0; i < 8; i++) {
         switch (this->mode_) {
-            case cssl::DIGEST_MODE::SHA_224:
+            case cc::crypto::DIGEST_MODE::SHA_224:
                 h_[i] = kSha224H0[i];
                 break;
-        case cssl::DIGEST_MODE::SHA_256:
+        case cc::crypto::DIGEST_MODE::SHA_256:
             h_[i] = kSha256H0[i];
             break;
         default:
@@ -123,7 +123,7 @@ void Sha256Context::clear()
     }
 }
 
-Sha512Context::Sha512Context(cssl::DIGEST_MODE mode)
+Sha512Context::Sha512Context(cc::crypto::DIGEST_MODE mode)
 {
     /* Set the pointers */
     pmsg_len_ = &msglen_;
@@ -142,16 +142,16 @@ void Sha512Context::clear()
 
     for (int i = 0; i < 8; i++) {
         switch (this->mode_) {
-        case cssl::DIGEST_MODE::SHA_384:
+        case cc::crypto::DIGEST_MODE::SHA_384:
             h_[i] = kSha384H0[i];
             break;
-        case cssl::DIGEST_MODE::SHA_512_224:
+        case cc::crypto::DIGEST_MODE::SHA_512_224:
             h_[i] = kSha512224H0[i];
             break;
-        case cssl::DIGEST_MODE::SHA_512_256:
+        case cc::crypto::DIGEST_MODE::SHA_512_256:
             h_[i] = kSha512256H0[i];
             break;
-        case cssl::DIGEST_MODE::SHA_512:
+        case cc::crypto::DIGEST_MODE::SHA_512:
             h_[i] = kSha512H0[i];
             break;
         default:
@@ -161,38 +161,38 @@ void Sha512Context::clear()
     }
 }
 
-int get_block_length(cssl::DIGEST_MODE mode)
+int get_block_length(cc::crypto::DIGEST_MODE mode)
 {
     switch (mode) {
-    case cssl::DIGEST_MODE::SHA_1:
+    case cc::crypto::DIGEST_MODE::SHA_1:
         return kSha1BlockSizeBytes;
         break;
-    case cssl::DIGEST_MODE::SHA_224:
-    case cssl::DIGEST_MODE::SHA_256:
+    case cc::crypto::DIGEST_MODE::SHA_224:
+    case cc::crypto::DIGEST_MODE::SHA_256:
         return kSha256BlockSizeBytes;
         break;
-    case cssl::DIGEST_MODE::SHA_384:
-    case cssl::DIGEST_MODE::SHA_512:
-    case cssl::DIGEST_MODE::SHA_512_224:
-    case cssl::DIGEST_MODE::SHA_512_256:
+    case cc::crypto::DIGEST_MODE::SHA_384:
+    case cc::crypto::DIGEST_MODE::SHA_512:
+    case cc::crypto::DIGEST_MODE::SHA_512_224:
+    case cc::crypto::DIGEST_MODE::SHA_512_256:
         return kSha512BlockSizeBytes;
         break;
-    case cssl::DIGEST_MODE::SHA_3_224:
+    case cc::crypto::DIGEST_MODE::SHA_3_224:
         return 1152 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_3_256:
+    case cc::crypto::DIGEST_MODE::SHA_3_256:
         return 1088 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_3_384:
+    case cc::crypto::DIGEST_MODE::SHA_3_384:
         return 832 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_3_512:
+    case cc::crypto::DIGEST_MODE::SHA_3_512:
         return 576 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_3_SHAKE_128:
+    case cc::crypto::DIGEST_MODE::SHA_3_SHAKE_128:
         return 1344 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_3_SHAKE_256:
+    case cc::crypto::DIGEST_MODE::SHA_3_SHAKE_256:
         return 1088 / 8;
         break;
     default:
@@ -201,28 +201,28 @@ int get_block_length(cssl::DIGEST_MODE mode)
     }
     return -1;
 }
-int get_return_length(cssl::DIGEST_MODE mode)
+int get_return_length(cc::crypto::DIGEST_MODE mode)
 {
     switch (mode) {
-    case cssl::DIGEST_MODE::SHA_1:
+    case cc::crypto::DIGEST_MODE::SHA_1:
         return 160 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_3_224:
-    case cssl::DIGEST_MODE::SHA_512_224:
-    case cssl::DIGEST_MODE::SHA_224:
+    case cc::crypto::DIGEST_MODE::SHA_3_224:
+    case cc::crypto::DIGEST_MODE::SHA_512_224:
+    case cc::crypto::DIGEST_MODE::SHA_224:
         return 224 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_3_256:
-    case cssl::DIGEST_MODE::SHA_512_256:
-    case cssl::DIGEST_MODE::SHA_256:
+    case cc::crypto::DIGEST_MODE::SHA_3_256:
+    case cc::crypto::DIGEST_MODE::SHA_512_256:
+    case cc::crypto::DIGEST_MODE::SHA_256:
         return 256 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_3_384:
-    case cssl::DIGEST_MODE::SHA_384:
+    case cc::crypto::DIGEST_MODE::SHA_3_384:
+    case cc::crypto::DIGEST_MODE::SHA_384:
         return 384 / 8;
         break;
-    case cssl::DIGEST_MODE::SHA_512:
-    case cssl::DIGEST_MODE::SHA_3_512:
+    case cc::crypto::DIGEST_MODE::SHA_512:
+    case cc::crypto::DIGEST_MODE::SHA_3_512:
         return 512 / 8;
         break;
     default:
@@ -231,40 +231,40 @@ int get_return_length(cssl::DIGEST_MODE mode)
     }
     return -1;
 }
-char *sha_mode_name(cssl::DIGEST_MODE mode)
+char *sha_mode_name(cc::crypto::DIGEST_MODE mode)
 {
     switch (mode) {
-    case cssl::DIGEST_MODE::SHA_1:
+    case cc::crypto::DIGEST_MODE::SHA_1:
         return (char *)"SHA_1";
         break;
-    case cssl::DIGEST_MODE::SHA_224:
+    case cc::crypto::DIGEST_MODE::SHA_224:
         return (char *)"SHA_224";
         break;
-    case cssl::DIGEST_MODE::SHA_256:
+    case cc::crypto::DIGEST_MODE::SHA_256:
         return (char *)"SHA_256";
         break;
-    case cssl::DIGEST_MODE::SHA_384:
+    case cc::crypto::DIGEST_MODE::SHA_384:
         return (char *)"SHA_384";
         break;
-    case cssl::DIGEST_MODE::SHA_512_224:
+    case cc::crypto::DIGEST_MODE::SHA_512_224:
         return (char *)"SHA_512_224";
         break;
-    case cssl::DIGEST_MODE::SHA_512_256:
+    case cc::crypto::DIGEST_MODE::SHA_512_256:
         return (char *)"SHA_512_256";
         break;
-    case cssl::DIGEST_MODE::SHA_512:
+    case cc::crypto::DIGEST_MODE::SHA_512:
         return (char *)"SHA_512";
         break;
-    case cssl::DIGEST_MODE::SHA_3_224:
+    case cc::crypto::DIGEST_MODE::SHA_3_224:
         return (char *)"SHA_3_224";
         break;
-    case cssl::DIGEST_MODE::SHA_3_256:
+    case cc::crypto::DIGEST_MODE::SHA_3_256:
         return (char *)"SHA_3_256";
         break;
-    case cssl::DIGEST_MODE::SHA_3_384:
+    case cc::crypto::DIGEST_MODE::SHA_3_384:
         return (char *)"SHA_3_384";
         break;
-    case cssl::DIGEST_MODE::SHA_3_512:
+    case cc::crypto::DIGEST_MODE::SHA_3_512:
         return (char *)"SHA_3_512";
         break;
     default:
@@ -276,25 +276,25 @@ char *sha_mode_name(cssl::DIGEST_MODE mode)
 int sha_update(const uint8_t *msg, size_t byMsg_len, ShaContext *ctx)
 {
     switch (ctx->mode_) {
-    case cssl::DIGEST_MODE::SHA_1:
+    case cc::crypto::DIGEST_MODE::SHA_1:
         sha1_update(msg, byMsg_len, (Sha1Context *)ctx);
         break;
-    case cssl::DIGEST_MODE::SHA_224:
-    case cssl::DIGEST_MODE::SHA_256:
+    case cc::crypto::DIGEST_MODE::SHA_224:
+    case cc::crypto::DIGEST_MODE::SHA_256:
         sha256_update(msg, byMsg_len, (Sha256Context *)ctx);
         break;
-    case cssl::DIGEST_MODE::SHA_512_224:
-    case cssl::DIGEST_MODE::SHA_512_256:
-    case cssl::DIGEST_MODE::SHA_384:
-    case cssl::DIGEST_MODE::SHA_512:
+    case cc::crypto::DIGEST_MODE::SHA_512_224:
+    case cc::crypto::DIGEST_MODE::SHA_512_256:
+    case cc::crypto::DIGEST_MODE::SHA_384:
+    case cc::crypto::DIGEST_MODE::SHA_512:
         sha512_update(msg, byMsg_len, (Sha512Context *)ctx);
         break;
-    case cssl::DIGEST_MODE::SHA_3_224:
-    case cssl::DIGEST_MODE::SHA_3_256:
-    case cssl::DIGEST_MODE::SHA_3_384:
-    case cssl::DIGEST_MODE::SHA_3_512:
-    case cssl::DIGEST_MODE::SHA_3_SHAKE_128:
-    case cssl::DIGEST_MODE::SHA_3_SHAKE_256:
+    case cc::crypto::DIGEST_MODE::SHA_3_224:
+    case cc::crypto::DIGEST_MODE::SHA_3_256:
+    case cc::crypto::DIGEST_MODE::SHA_3_384:
+    case cc::crypto::DIGEST_MODE::SHA_3_512:
+    case cc::crypto::DIGEST_MODE::SHA_3_SHAKE_128:
+    case cc::crypto::DIGEST_MODE::SHA_3_SHAKE_256:
         sha3_update(msg, byMsg_len, ctx);
         break;
     default:
@@ -305,27 +305,27 @@ int sha_update(const uint8_t *msg, size_t byMsg_len, ShaContext *ctx)
 int sha_digest(uint8_t *digest_out, ShaContext *ctx)
 {
     switch (ctx->mode_) {
-    case cssl::DIGEST_MODE::SHA_1:
+    case cc::crypto::DIGEST_MODE::SHA_1:
         sha1_digest(digest_out, (Sha1Context *)ctx);
         break;
-    case cssl::DIGEST_MODE::SHA_224:
-    case cssl::DIGEST_MODE::SHA_256:
+    case cc::crypto::DIGEST_MODE::SHA_224:
+    case cc::crypto::DIGEST_MODE::SHA_256:
         sha256_digest(digest_out, (Sha256Context *)ctx);
         break;
-    case cssl::DIGEST_MODE::SHA_384:
-    case cssl::DIGEST_MODE::SHA_512:
-    case cssl::DIGEST_MODE::SHA_512_224:
-    case cssl::DIGEST_MODE::SHA_512_256:
+    case cc::crypto::DIGEST_MODE::SHA_384:
+    case cc::crypto::DIGEST_MODE::SHA_512:
+    case cc::crypto::DIGEST_MODE::SHA_512_224:
+    case cc::crypto::DIGEST_MODE::SHA_512_256:
         sha512_digest(digest_out, (Sha512Context *)ctx);
         break;
-    case cssl::DIGEST_MODE::SHA_3_224:
-    case cssl::DIGEST_MODE::SHA_3_256:
-    case cssl::DIGEST_MODE::SHA_3_384:
-    case cssl::DIGEST_MODE::SHA_3_512:
+    case cc::crypto::DIGEST_MODE::SHA_3_224:
+    case cc::crypto::DIGEST_MODE::SHA_3_256:
+    case cc::crypto::DIGEST_MODE::SHA_3_384:
+    case cc::crypto::DIGEST_MODE::SHA_3_512:
         sha3_digest(digest_out, ctx);
         break;
-    case cssl::DIGEST_MODE::SHA_3_SHAKE_128:
-    case cssl::DIGEST_MODE::SHA_3_SHAKE_256:
+    case cc::crypto::DIGEST_MODE::SHA_3_SHAKE_128:
+    case cc::crypto::DIGEST_MODE::SHA_3_SHAKE_256:
         sha3_shake_digest(digest_out, ((Sha3Context *)ctx)->digest_bytes_, ctx);
         break;
     default:
@@ -334,29 +334,29 @@ int sha_digest(uint8_t *digest_out, ShaContext *ctx)
     return 0;
 }
 
-ShaContext *sha_new_context(cssl::DIGEST_MODE mode)
+ShaContext *sha_new_context(cc::crypto::DIGEST_MODE mode)
 {
     ShaContext *ctx = NULL;
     switch (mode) {
-    case cssl::DIGEST_MODE::SHA_1:
+    case cc::crypto::DIGEST_MODE::SHA_1:
         ctx = new Sha1Context();
         break;
-    case cssl::DIGEST_MODE::SHA_224:
-    case cssl::DIGEST_MODE::SHA_256:
+    case cc::crypto::DIGEST_MODE::SHA_224:
+    case cc::crypto::DIGEST_MODE::SHA_256:
         ctx = new Sha256Context(mode);
         break;
-    case cssl::DIGEST_MODE::SHA_384:
-    case cssl::DIGEST_MODE::SHA_512_256:
-    case cssl::DIGEST_MODE::SHA_512_224:
-    case cssl::DIGEST_MODE::SHA_512:
+    case cc::crypto::DIGEST_MODE::SHA_384:
+    case cc::crypto::DIGEST_MODE::SHA_512_256:
+    case cc::crypto::DIGEST_MODE::SHA_512_224:
+    case cc::crypto::DIGEST_MODE::SHA_512:
         ctx = new Sha512Context(mode);
         break;
-    case cssl::DIGEST_MODE::SHA_3_224:
-    case cssl::DIGEST_MODE::SHA_3_256:
-    case cssl::DIGEST_MODE::SHA_3_384:
-    case cssl::DIGEST_MODE::SHA_3_512:
-    case cssl::DIGEST_MODE::SHA_3_SHAKE_128:
-    case cssl::DIGEST_MODE::SHA_3_SHAKE_256:
+    case cc::crypto::DIGEST_MODE::SHA_3_224:
+    case cc::crypto::DIGEST_MODE::SHA_3_256:
+    case cc::crypto::DIGEST_MODE::SHA_3_384:
+    case cc::crypto::DIGEST_MODE::SHA_3_512:
+    case cc::crypto::DIGEST_MODE::SHA_3_SHAKE_128:
+    case cc::crypto::DIGEST_MODE::SHA_3_SHAKE_256:
         ctx = new Sha3Context(mode);
         break;
     default:

@@ -119,10 +119,10 @@ int sha512_update(const uint8_t *msg, size_t byMsg_len, ShaContext *ctx)
 {
     if (ctx == NULL || (msg == NULL && byMsg_len != 0))
         return -1;
-    if (ctx->mode_ != cssl::DIGEST_MODE::SHA_512 &&
-        ctx->mode_ != cssl::DIGEST_MODE::SHA_384 &&
-        ctx->mode_ != cssl::DIGEST_MODE::SHA_512_224 &&
-        ctx->mode_ != cssl::DIGEST_MODE::SHA_512_256)
+    if (ctx->mode_ != cc::crypto::DIGEST_MODE::SHA_512 &&
+        ctx->mode_ != cc::crypto::DIGEST_MODE::SHA_384 &&
+        ctx->mode_ != cc::crypto::DIGEST_MODE::SHA_512_224 &&
+        ctx->mode_ != cc::crypto::DIGEST_MODE::SHA_512_256)
         return -1;
 
     uint64_t *bMsg_len = (uint64_t *)ctx->pmsg_len_;
@@ -175,10 +175,10 @@ int sha512_digest(uint8_t *digest_out, ShaContext *ctx)
 {
     if (digest_out == NULL || ctx == NULL)
         return -1;
-    if (ctx->mode_ != cssl::DIGEST_MODE::SHA_512 &&
-        ctx->mode_ != cssl::DIGEST_MODE::SHA_384 &&
-        ctx->mode_ != cssl::DIGEST_MODE::SHA_512_224 &&
-        ctx->mode_ != cssl::DIGEST_MODE::SHA_512_256)
+    if (ctx->mode_ != cc::crypto::DIGEST_MODE::SHA_512 &&
+        ctx->mode_ != cc::crypto::DIGEST_MODE::SHA_384 &&
+        ctx->mode_ != cc::crypto::DIGEST_MODE::SHA_512_224 &&
+        ctx->mode_ != cc::crypto::DIGEST_MODE::SHA_512_256)
         return -1;
 
     uint64_t *bMsg_len = (uint64_t *)ctx->pmsg_len_;

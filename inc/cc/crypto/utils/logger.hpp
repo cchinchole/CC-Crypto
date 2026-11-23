@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../utils/bytes.hpp"
+#include "bytes.hpp"
 #include <format>
 #include <openssl/bn.h>
 #include <sstream>

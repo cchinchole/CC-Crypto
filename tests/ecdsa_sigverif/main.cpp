@@ -1,6 +1,6 @@
-#include "../../inc/crypto/ec.hpp"
-#include "../../inc/utils/bytes.hpp"
-#include "../../inc/utils/logger.hpp"
+#include "cc/crypto/ec.hpp"
+#include "cc/crypto/utils/bytes.hpp"
+#include "cc/crypto/utils/logger.hpp"
 #include <fstream>
 #include <iostream>
 #include <openssl/bn.h>
@@ -142,34 +142,34 @@ int didTestSucceed(std::string s)
         return 0;
 }
 
-cssl::DIGEST_MODE haveSHA(const std::string &s)
+cc::crypto::DIGEST_MODE haveSHA(const std::string &s)
 {
-    static const std::unordered_map<std::string, cssl::DIGEST_MODE> sha_map = {
-        {"SHA-1", cssl::DIGEST_MODE::SHA_1},
-        {"SHA-224", cssl::DIGEST_MODE::SHA_224},
-        {"SHA-256", cssl::DIGEST_MODE::SHA_256},
-        {"SHA-384", cssl::DIGEST_MODE::SHA_384},
-        {"SHA-512", cssl::DIGEST_MODE::SHA_512},
-        {"SHA3_224", cssl::DIGEST_MODE::SHA_3_224},
-        {"SHA3_256", cssl::DIGEST_MODE::SHA_3_256},
-        {"SHA3_384", cssl::DIGEST_MODE::SHA_3_384},
-        {"SHA3_512", cssl::DIGEST_MODE::SHA_3_512}};
+    static const std::unordered_map<std::string, cc::crypto::DIGEST_MODE> sha_map = {
+        {"SHA-1", cc::crypto::DIGEST_MODE::SHA_1},
+        {"SHA-224", cc::crypto::DIGEST_MODE::SHA_224},
+        {"SHA-256", cc::crypto::DIGEST_MODE::SHA_256},
+        {"SHA-384", cc::crypto::DIGEST_MODE::SHA_384},
+        {"SHA-512", cc::crypto::DIGEST_MODE::SHA_512},
+        {"SHA3_224", cc::crypto::DIGEST_MODE::SHA_3_224},
+        {"SHA3_256", cc::crypto::DIGEST_MODE::SHA_3_256},
+        {"SHA3_384", cc::crypto::DIGEST_MODE::SHA_3_384},
+        {"SHA3_512", cc::crypto::DIGEST_MODE::SHA_3_512}};
 
     auto it = sha_map.find(s);
-    return it != sha_map.end() ? it->second : cssl::DIGEST_MODE::NONE;
+    return it != sha_map.end() ? it->second : cc::crypto::DIGEST_MODE::NONE;
 }
 
-cssl::EC_GROUP haveCurve(std::string s)
+cc::crypto::EC_GROUP haveCurve(std::string s)
 {
-    static const std::unordered_map<std::string, cssl::EC_GROUP> group_map = {
-        {"P-224", cssl::EC_GROUP::P224},
-        {"P-256", cssl::EC_GROUP::P256},
-        {"P-384", cssl::EC_GROUP::P384},
-        {"P-521", cssl::EC_GROUP::P521},
+    static const std::unordered_map<std::string, cc::crypto::EC_GROUP> group_map = {
+        {"P-224", cc::crypto::EC_GROUP::P224},
+        {"P-256", cc::crypto::EC_GROUP::P256},
+        {"P-384", cc::crypto::EC_GROUP::P384},
+        {"P-521", cc::crypto::EC_GROUP::P521},
     };
 
     auto it = group_map.find(s);
-    return it != group_map.end() ? it->second : cssl::EC_GROUP::NONE;
+    return it != group_map.end() ? it->second : cc::crypto::EC_GROUP::NONE;
 }
 
 int main()
@@ -181,16 +181,16 @@ int main()
     int totalPassed = 0, totalFailed = 0;
     for (const auto &ch : rsp.curve_hash_tests)
     {
-        cssl::DIGEST_MODE shaMode = haveSHA(ch.hash);
-        cssl::EC_GROUP group = haveCurve(ch.curve);
+        cc::crypto::DIGEST_MODE shaMode = haveSHA(ch.hash);
+        cc::crypto::EC_GROUP group = haveCurve(ch.curve);
 
-        if (shaMode != cssl::DIGEST_MODE::NONE && group != cssl::EC_GROUP::NONE)
+        if (shaMode != cc::crypto::DIGEST_MODE::NONE && group != cc::crypto::EC_GROUP::NONE)
         {
             int p = 0, f = 0;
             for (const auto &t : ch.tests)
             {
-                cssl::Ec keyPair = cssl::Ec::from(group, "00", t.Qx, t.Qy);
-                cssl::EcSignature sig = cssl::EcSignature::from(t.R, t.S);
+                cc::crypto::Ec keyPair = cc::crypto::Ec::from(group, "00", t.Qx, t.Qy);
+                cc::crypto::EcSignature sig = cc::crypto::EcSignature::from(t.R, t.S);
                 std::vector<uint8_t> msgBytes = hex_to_bytes(t.msg_hex);
                 if (keyPair.verify(sig, msgBytes, shaMode) ==
                     didTestSucceed(t.Result))

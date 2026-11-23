@@ -1,9 +1,9 @@
 #include "internal/hmac.hpp"
-#include "inc/hash/hash.hpp"
+#include "cc/crypto/hash.hpp"
 #include <algorithm>
 #include <math.h>
 
-using namespace cssl;
+using namespace cc::crypto;
 
 /* FIPS 198-1 */
 void hmacFinalize(DIGEST_MODE digest_mode, uint8_t *hmac_out,

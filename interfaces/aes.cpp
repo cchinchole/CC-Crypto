@@ -1,10 +1,10 @@
-#include "../inc/utils/bytes.hpp"
+#include "cc/crypto/utils/bytes.hpp"
 #include "../internal/aes.hpp"
-#include "../inc/crypto/aes.hpp"
-#include "../inc/utils/logger.hpp"
+#include "cc/crypto/aes.hpp"
+#include "cc/crypto/utils/logger.hpp"
 #include <memory>
 
-namespace cssl
+namespace cc::crypto
 {
 
 struct Aes::Impl

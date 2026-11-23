@@ -1,10 +1,10 @@
 #pragma once
-#include "../inc/utils/bytes.hpp"
-#include "../inc/types.hpp"
+#include "cc/crypto/utils/bytes.hpp"
+#include "cc/crypto/types.hpp"
 #include <openssl/bn.h>
 #include <string>
 
-std::string ec_group_string(cssl::EC_GROUP group);
+std::string ec_group_string(cc::crypto::EC_GROUP group);
 
 // Purely internal classes, no reason to export them.
 class EcPoint {
@@ -35,8 +35,8 @@ class EcPrimeField {
     BIGNUM* n_;
     int h;
     EcPoint *g_;
-    cssl::EC_GROUP group_;
-    EcPrimeField(const char* p, const char* a, const char* b, const char* n, const char* gx, const char* gy, cssl::EC_GROUP group) {
+    cc::crypto::EC_GROUP group_;
+    EcPrimeField(const char* p, const char* a, const char* b, const char* n, const char* gx, const char* gy, cc::crypto::EC_GROUP group) {
         p_ = BN_secure_new();
         a_ = BN_secure_new();
         b_ = BN_secure_new();
@@ -61,10 +61,10 @@ class EcPrimeField {
 
 class EcKey {
   public:
-    cssl::EC_GROUP group_;
+    cc::crypto::EC_GROUP group_;
     BIGNUM* priv_; /* d */
     EcPoint pub_; /* Q */
-    EcKey(cssl::EC_GROUP group);
+    EcKey(cc::crypto::EC_GROUP group);
     EcKey& operator=(const EcKey& from) {
         if (this != &from) {
             BN_copy(priv_, from.priv_);
@@ -91,8 +91,8 @@ class cEcSignature {
 
 int ec_generate_keypair(EcKey &ret);
 int ec_verify_signature(EcKey &key, cEcSignature &sig, ByteSpan msg,
-                       cssl::DIGEST_MODE shaMode = cssl::DIGEST_MODE::SHA_512);
+                       cc::crypto::DIGEST_MODE shaMode = cc::crypto::DIGEST_MODE::SHA_512);
 int ec_generate_signature(EcKey &key, cEcSignature &sig,
                                        ByteSpan msg,
-                                       cssl::DIGEST_MODE shaMode = cssl::DIGEST_MODE::SHA_512,
+                                       cc::crypto::DIGEST_MODE shaMode = cc::crypto::DIGEST_MODE::SHA_512,
                                        char *kSecret = NULL);

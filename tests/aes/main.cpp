@@ -1,6 +1,6 @@
-#include "../../inc/crypto/aes.hpp"
-#include "../../inc/utils/bytes.hpp"
-#include "../../inc/utils/logger.hpp"
+#include "cc/crypto/aes.hpp"
+#include "cc/crypto/utils/bytes.hpp"
+#include "cc/crypto/utils/logger.hpp"
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -118,26 +118,26 @@ SiggenRsp parseSigGen(const std::string &filename)
     return rsp;
 }
 
-cssl::AES_MODE getMode(std::string &s)
+cc::crypto::AES_MODE getMode(std::string &s)
 {
-    static const std::unordered_map<std::string, cssl::AES_MODE> stringToEnum = {
-        {"ECB", cssl::AES_MODE::ECB}, {"CBC", cssl::AES_MODE::CBC}, {"CTR", cssl::AES_MODE::CTR},
-        {"CFB", cssl::AES_MODE::CFB}, {"OFB", cssl::AES_MODE::OFB},
+    static const std::unordered_map<std::string, cc::crypto::AES_MODE> stringToEnum = {
+        {"ECB", cc::crypto::AES_MODE::ECB}, {"CBC", cc::crypto::AES_MODE::CBC}, {"CTR", cc::crypto::AES_MODE::CTR},
+        {"CFB", cc::crypto::AES_MODE::CFB}, {"OFB", cc::crypto::AES_MODE::OFB},
     };
 
     auto it = stringToEnum.find(s);
     if (it == stringToEnum.end())
-        return cssl::AES_MODE::NONE;
+        return cc::crypto::AES_MODE::NONE;
 
     return it->second;
 }
 
-cssl::AES_KEYSIZE getKeySize(std::string &s)
+cc::crypto::AES_KEYSIZE getKeySize(std::string &s)
 {
-    static const std::unordered_map<std::string, cssl::AES_KEYSIZE> stringToEnum = {
-        {"128", cssl::AES_KEYSIZE::m128},
-        {"192", cssl::AES_KEYSIZE::m192},
-        {"256", cssl::AES_KEYSIZE::m256},
+    static const std::unordered_map<std::string, cc::crypto::AES_KEYSIZE> stringToEnum = {
+        {"128", cc::crypto::AES_KEYSIZE::m128},
+        {"192", cc::crypto::AES_KEYSIZE::m192},
+        {"256", cc::crypto::AES_KEYSIZE::m256},
     };
 
     auto it = stringToEnum.find(s);
@@ -148,9 +148,9 @@ void runTest(std::string path, std::string fileName, std::string sMode,
              std::string keySize, int *passed, int *failed)
 {
 
-    cssl::AES_MODE mode = getMode(sMode);
-    cssl::AES_KEYSIZE kSize = getKeySize(keySize);
-    if (mode == cssl::AES_MODE::NONE)
+    cc::crypto::AES_MODE mode = getMode(sMode);
+    cc::crypto::AES_KEYSIZE kSize = getKeySize(keySize);
+    if (mode == cc::crypto::AES_MODE::NONE)
     {
         printf("Invalid AES mode\n");
         return;
@@ -164,9 +164,9 @@ void runTest(std::string path, std::string fileName, std::string sMode,
         {
             if (ch.state == "ENCRYPT")
             {
-                cssl::Aes aes(mode, kSize);
+                cc::crypto::Aes aes(mode, kSize);
 
-                if (mode != cssl::AES_MODE::ECB)
+                if (mode != cc::crypto::AES_MODE::ECB)
                     aes.load_key(t.KEY, t.IV);
                 else
                     aes.load_key(t.KEY);
@@ -183,8 +183,8 @@ void runTest(std::string path, std::string fileName, std::string sMode,
             }
             else if (ch.state == "DECRYPT")
             {
-                cssl::Aes aes(mode, kSize);
-                if (mode != cssl::AES_MODE::ECB)
+                cc::crypto::Aes aes(mode, kSize);
+                if (mode != cc::crypto::AES_MODE::ECB)
                     aes.load_key(t.KEY, t.IV);
                 else
                     aes.load_key(t.KEY);

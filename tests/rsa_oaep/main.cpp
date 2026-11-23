@@ -1,23 +1,23 @@
-#include "../../inc/crypto/rsa.hpp"
-#include "../../inc/utils/bytes.hpp"
-#include "../../inc/utils/logger.hpp"
+#include "cc/crypto/rsa.hpp"
+#include "cc/crypto/utils/bytes.hpp"
+#include "cc/crypto/utils/logger.hpp"
 #include "../common/jsonParser.hpp"
 #include <openssl/bn.h>
 #include <string>
 
-using namespace cssl::Parser;
+using namespace cc::crypto::Parser;
 
-cssl::DIGEST_MODE sha_name(const std::string &s)
+cc::crypto::DIGEST_MODE sha_name(const std::string &s)
 {
-    static const std::unordered_map<std::string, cssl::DIGEST_MODE> sha_map = {
-        {"SHA-1", cssl::DIGEST_MODE::SHA_1},
-        {"SHA-224", cssl::DIGEST_MODE::SHA_224},
-        {"SHA-256", cssl::DIGEST_MODE::SHA_256},
-        {"SHA-384", cssl::DIGEST_MODE::SHA_384},
-        {"SHA-512", cssl::DIGEST_MODE::SHA_512}};
+    static const std::unordered_map<std::string, cc::crypto::DIGEST_MODE> sha_map = {
+        {"SHA-1", cc::crypto::DIGEST_MODE::SHA_1},
+        {"SHA-224", cc::crypto::DIGEST_MODE::SHA_224},
+        {"SHA-256", cc::crypto::DIGEST_MODE::SHA_256},
+        {"SHA-384", cc::crypto::DIGEST_MODE::SHA_384},
+        {"SHA-512", cc::crypto::DIGEST_MODE::SHA_512}};
 
     auto it = sha_map.find(s);
-    return it != sha_map.end() ? it->second : cssl::DIGEST_MODE::NONE;
+    return it != sha_map.end() ? it->second : cc::crypto::DIGEST_MODE::NONE;
 }
 
 // Returns 1 on success
@@ -30,13 +30,13 @@ uint8_t runTestCase(const TestVector &vector, const TestGroup &group, const Test
     std::string groupD = group.params.at("d").get<std::string>();
     std::string groupE = group.params.at("e").get<std::string>();
     std::string groupN = group.params.at("n").get<std::string>();
-    cssl::DIGEST_MODE mgfSha = sha_name(group.params.at("mgfSha").get<std::string>());
-    cssl::DIGEST_MODE groupSha = sha_name(group.params.at("sha").get<std::string>());
+    cc::crypto::DIGEST_MODE mgfSha = sha_name(group.params.at("mgfSha").get<std::string>());
+    cc::crypto::DIGEST_MODE groupSha = sha_name(group.params.at("sha").get<std::string>());
     ByteArray label = hex_to_bytes(test.params.at("label").get<std::string>());
     ByteArray msg = hex_to_bytes(test.params.at("msg").get<std::string>());
     ByteArray ct = hex_to_bytes(test.params.at("ct").get<std::string>());
     ByteArray decrypted;
-    cssl::Rsa rsa(keySize);
+    cc::crypto::Rsa rsa(keySize);
 
     rsa.load_private_key(groupN, groupD);
     rsa.load_public_key(groupN, groupE);

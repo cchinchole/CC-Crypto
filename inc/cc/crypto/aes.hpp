@@ -1,9 +1,9 @@
 #pragma once
-#include "../types.hpp"
-#include "../utils/bytes.hpp"
+#include "types.hpp"
+#include "utils/bytes.hpp"
 #include <memory>
 
-namespace cssl {
+namespace cc::crypto {
 class Aes {
 private:
     struct Impl;

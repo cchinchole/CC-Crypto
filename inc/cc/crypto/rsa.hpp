@@ -1,9 +1,9 @@
 #pragma once
 #include <stdio.h>
-#include "../utils/bytes.hpp"
-#include "../types.hpp"
+#include "utils/bytes.hpp"
+#include "types.hpp"
 
-namespace cssl {
+namespace cc::crypto {
 class Rsa {
     private:
         struct Impl;

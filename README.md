@@ -1,4 +1,4 @@
-# chincholeSSL #
+# CC-Crypto #
 This is a project I did to learn about the mathematics behind cryptography during University. I followed the FIPS standard issued by NIST.
 To see more details on which FIPS documents were used, refer to docs/Crypto.pdf where I break down the documents into a more readable format while citing which document they are within.
 
@@ -13,22 +13,22 @@ To see more details on which FIPS documents were used, refer to docs/Crypto.pdf 
 
 ## Building and installing ##
 1. Ensure the dependencies is installed and the libraries are accessible
-2. git clone https://github.com/cchinchole/chincholeSSL && cd chincholeSSL
+2. git clone https://github.com/cchinchole/CC-Crypto && cd CC-Crypto
 3. make all - This will build both the lib and examples
-4. make install - Installs the libraries to /usr/local/lib and /usr/local/include
+4. make install - Installs the libraries to /usr/local/lib and the headers to /usr/local/include/cc/crypto (override with PREFIX=...)
 
 ## Example Usage ##
 *For more details, review the examples folder*\
-Note: you can use the global include header "cssl/cssl.hpp or include the modules needed directly.\
+Note: you can use the global include header <cc/crypto.hpp> or include the modules needed directly. Everything lives in the `cc::crypto` namespace.\
 ### AES ###
 ```cpp
-    #include "cssl/crypto/aes.hpp"
-    #include "cssl/utils/bytes.hpp"
+    #include <cc/crypto/aes.hpp>
+    #include <cc/crypto/utils/bytes.hpp>
 
     std::string aes_kat_key = "2b7e151628aed2a6abf7158809cf4f3c";
     std::string aes_iv_key = "000102030405060708090a0b0c0d0e0f";
     std::string cbc_kat = "3243f6a8885a308d313198a2e0370734";
-    cssl::Aes aes(cssl::AES_MODE::CBC, cssl::AES_KEYSIZE::m128);
+    cc::crypto::Aes aes(cc::crypto::AES_MODE::CBC, cc::crypto::AES_KEYSIZE::m128);
 
     aes.load_key(aes_kat_key, aes_iv_key);
 
@@ -39,10 +39,10 @@ Note: you can use the global include header "cssl/cssl.hpp or include the module
 
 ### RSA ###
 ```cpp
-    #include "cssl/crypto/rsa.hpp"
-    #include "cssl/utils/bytes.hpp"
+    #include <cc/crypto/rsa.hpp>
+    #include <cc/crypto/utils/bytes.hpp>
 
-    cssl::Rsa rsaOAEP(1024);
+    cc::crypto::Rsa rsaOAEP(1024);
 
     // Load the key like this
     rsaOAEP.load_public_key(modulus, publicExponent);
@@ -59,7 +59,7 @@ Note: you can use the global include header "cssl/cssl.hpp or include the module
     //rsaOAEP.generate_key();
     
     //No need to specify the label can leave it empty, same with the seed. This is mostly for ensuring a constant Encode.
-    rsaOAEP.add_oaep({}, hex_to_bytes("18b776ea21069d69776a33e96bad48e1dda0a5ef"), cssl::DIGEST_MODE::SHA_1, cssl::DIGEST_MODE::SHA_1);
+    rsaOAEP.add_oaep({}, hex_to_bytes("18b776ea21069d69776a33e96bad48e1dda0a5ef"), cc::crypto::DIGEST_MODE::SHA_1, cc::crypto::DIGEST_MODE::SHA_1);
 
     //Leaving off the addOAEP will use raw RSA.
     ByteArray c = rsaOAEP.encrypt(hexToBytes("6628194e12073db03ba94cda9ef9532397d50dba79b987004afefe34"));
@@ -68,33 +68,33 @@ Note: you can use the global include header "cssl/cssl.hpp or include the module
 
 ### EC ###
 ```cpp
-    #include "cssl/crypto/ec.hpp"
-    #include "cssl/utils/bytes.hpp"
+    #include <cc/crypto/ec.hpp>
+    #include <cc/crypto/utils/bytes.hpp>
 
     //Note that you cannot use SHAKE digest functions for the signature,
     //It will silently fail to verify or generate the signature.
 
-    cssl::Ec ec = cssl::Ec::generate_key(cssl::EC_GROUP::P256);
+    cc::crypto::Ec ec = cc::crypto::Ec::generate_key(cc::crypto::EC_GROUP::P256);
     //Ec ec = Ec::from(group, "d", "px", "py");
     ByteArray msg = hex_to_bytes("aabbccddeeffaabbcceeddeedd11001100");
-    cssl::EcSignature sig = ec.sign(msg, cssl::DIGEST_MODE::SHA_256);
-    bool verification = ec.verify(sig, msg, cssl::DIGEST_MODE::SHA_256);
+    cc::crypto::EcSignature sig = ec.sign(msg, cc::crypto::DIGEST_MODE::SHA_256);
+    bool verification = ec.verify(sig, msg, cc::crypto::DIGEST_MODE::SHA_256);
 ```
 
 ### HASH ###
 ```cpp
-    #include "../inc/hash/hash.hpp"
+    #include <cc/crypto/hash.hpp>
 
     //Example for oneshot hashing. For SHAKE use Hasher::xof
     ByteArray msg = hex_to_bytes(ascii_to_hex("Hello World!"));
-    ByteArray hash = cssl::Hasher::hash(msg, cssl::DIGEST_MODE::SHA_1);
+    ByteArray hash = cc::crypto::Hasher::hash(msg, cc::crypto::DIGEST_MODE::SHA_1);
 
     //Example for HMAC
     ByteArray key = hex_to_bytes(ascii_to_hex("HelloKey!"));
-    ByteArray hmacDigest = cssl::Hasher::hmac(msg, key, cssl::DIGEST_MODE::SHA_3_512);
+    ByteArray hmacDigest = cc::crypto::Hasher::hmac(msg, key, cc::crypto::DIGEST_MODE::SHA_3_512);
 
     //Example using update + SHAKE
-    cssl::Hasher h(cssl::DIGEST_MODE::SHA_3_SHAKE_128);
+    cc::crypto::Hasher h(cc::crypto::DIGEST_MODE::SHA_3_SHAKE_128);
     h.update(msg);
     ByteArray hash = h.xof(72); //72 being the amount of bytes to output.
 ```
