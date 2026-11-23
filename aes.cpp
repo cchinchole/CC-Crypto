@@ -489,7 +489,7 @@ int aes_cbc_decrypt(AesContext &ctx, uint8_t *output, const uint8_t *buf,
 // SP800-38A 6.3
 // Current implementation only works for 128mode.
 int aes_cfb_xcrypt(AesContext &ctx, uint8_t *output, const uint8_t *buf,
-               size_t buf_len)
+               size_t buf_len, bool encrypt)
 {
     uint8_t iv[16];
     memcpy(iv, ctx.iv_, 16);
@@ -505,7 +505,10 @@ int aes_cfb_xcrypt(AesContext &ctx, uint8_t *output, const uint8_t *buf,
             for (uint8_t k = 0; k < kNb; k++)
                 output[j * kNb + k] = buf[j * kNb + k] ^ keystream[j * kNb + k];
 
-        memcpy(iv, keystream, kAesBlockSize);
+        if(encrypt)
+            memcpy(iv, output, kAesBlockSize);
+        else
+            memcpy(iv, buf, kAesBlockSize);
 
         buf += kAesBlockSize;
         output += kAesBlockSize;
@@ -605,7 +608,7 @@ ByteArray aes_encrypt(AesContext &ctx, ByteSpan buf)
         break;
 
     case cc::crypto::AES_MODE::CFB:
-        aes_cfb_xcrypt(ctx, output.data(), buf.data(), buf.size());
+        aes_cfb_xcrypt(ctx, output.data(), buf.data(), buf.size(), true);
         break;
 
     default:
@@ -639,7 +642,7 @@ ByteArray aes_decrypt(AesContext &ctx, ByteSpan buf)
         break;
 
     case cc::crypto::AES_MODE::CFB:
-        aes_cfb_xcrypt(ctx, output.data(), buf.data(), buf.size());
+        aes_cfb_xcrypt(ctx, output.data(), buf.data(), buf.size(), false);
         break;
 
     default:
