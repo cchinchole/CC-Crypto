@@ -199,6 +199,7 @@ std::vector<uint8_t> rsa_mgf1(std::span<const uint8_t> seed, size_t maskLen,
     return mask;
 }
 
+/* SP800-56Br2 7.1.1 */
 std::vector<uint8_t> rsa_encrypt_primative(RsaKey &key,
                                            std::span<const uint8_t> src)
 {
@@ -243,14 +244,16 @@ std::vector<uint8_t> rsa_encrypt_primative(RsaKey &key,
     return returnData;
 }
 
+/* SP800-56Br2 7.1.2 */
 std::vector<uint8_t> rsa_decrypt_primative(RsaKey &key,
                                            std::span<const uint8_t> cipher)
 {
     BN_CTX *ctx = BN_CTX_secure_new();
     bool error_raised = false;
     size_t k = key.modulus_bits_ / 8;
+
     // RSA block size
-    unsigned int max_bytes = k; // key.kBits / 8;
+    unsigned int max_bytes = k;
 
     // Assume cipher is multiple of maxBytes
     unsigned int num_pages = cipher.size() / max_bytes;
@@ -275,8 +278,12 @@ std::vector<uint8_t> rsa_decrypt_primative(RsaKey &key,
         BIGNUM *cipher_number = BN_CTX_get(ctx);
         BN_bin2bn(cipher.data() + i * max_bytes, max_bytes, cipher_number);
 
-        if (BN_cmp(cipher_number, key.n_) == 0 ||
-            BN_cmp(cipher_number, key.n_) == 1)
+        /* 1 < c < (n-1) */
+        BIGNUM *n_minus_one = BN_CTX_get(ctx);
+        BN_copy(n_minus_one, key.n_);
+        BN_sub_word(n_minus_one, 1);
+        if (BN_cmp(cipher_number, BN_value_one()) <= 0 ||
+            BN_cmp(cipher_number, n_minus_one) >= 0)
         {
             // Failure;
             error_raised = true;
