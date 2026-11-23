@@ -6,5 +6,6 @@ compile_commands.json
 *.out
 build/*.*
 Docs/*.txt
+acvp_tests/
 .vscode/
 .cache/
