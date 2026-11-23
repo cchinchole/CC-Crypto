@@ -10,6 +10,35 @@ constexpr int kSha512BlockSizeBytes = 128;
 constexpr int kSha3Words = 25;     /* 1600/8 / sizeof(uint64_t) */
 constexpr int kSha3SpongeArr = 5; /* 25 / 5*/
 
+/* Shared SHA-1 / SHA-2 helpers */
+inline uint64_t sha_ch(uint64_t x, uint64_t y, uint64_t z) { return (x & y) ^ (~x & z); }
+inline uint64_t sha_parity(uint64_t x, uint64_t y, uint64_t z) { return x ^ y ^ z; }
+inline uint64_t sha_maj(uint64_t x, uint64_t y, uint64_t z) { return (x & y) ^ (x & z) ^ (y & z); }
+
+inline uint32_t sha_load_be32(const uint8_t *p)
+{
+    return ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) | ((uint32_t)p[2] << 8) | (uint32_t)p[3];
+}
+
+inline uint64_t sha_load_be64(const uint8_t *p)
+{
+    return ((uint64_t)sha_load_be32(p) << 32) | sha_load_be32(p + 4);
+}
+
+inline void sha_store_be32(uint8_t *p, uint32_t v)
+{
+    p[0] = (uint8_t)(v >> 24);
+    p[1] = (uint8_t)(v >> 16);
+    p[2] = (uint8_t)(v >> 8);
+    p[3] = (uint8_t)v;
+}
+
+inline void sha_store_be64(uint8_t *p, uint64_t v)
+{
+    sha_store_be32(p, (uint32_t)(v >> 32));
+    sha_store_be32(p + 4, (uint32_t)v);
+}
+
 class ShaContext
 {
 private:
@@ -21,23 +50,6 @@ public:
     void* pblock_;
     virtual void clear() {}
     virtual ~ShaContext() {}
-};
-
-class Sha3Context : public ShaContext
-{
-private:
-public:
-    size_t digest_bytes_ = 0;
-    uint32_t r_ = 0;
-
-    union
-    {
-        uint8_t bytes[kSha3Words * 8];
-        uint64_t words[kSha3SpongeArr][kSha3SpongeArr];
-    } sponge_;
-
-    Sha3Context(cssl::DIGEST_MODE mode);
-    void clear();
 };
 
 class Sha1Context : public ShaContext
@@ -54,49 +66,19 @@ private:
 
 public:
     Sha1Context();
-
     void clear();
 };
 
-class Sha224Context : public ShaContext
-{
-private:
-    uint64_t msglen_ = 0;
-    uint32_t h_[8] = {
-        0xc1059ed8,
-        0x367cd507,
-        0x3070dd17,
-        0xf70e5939,
-        0xffc00b31,
-        0x68581511,
-        0x64f98fa7,
-        0xbefa4fa4};
-    uint8_t block_[kSha256BlockSizeBytes];
-
-public:
-    Sha224Context();
-
-    void clear();
-};
 
 class Sha256Context : public ShaContext
 {
 private:
     uint64_t msglen_ = 0;
-    uint32_t h_[8] = {
-        0x6a09e667,
-        0xbb67ae85,
-        0x3c6ef372,
-        0xa54ff53a,
-        0x510e527f,
-        0x9b05688c,
-        0x1f83d9ab,
-        0x5be0cd19};
+    uint32_t h_[8];
     uint8_t block_[kSha256BlockSizeBytes];
 
 public:
-    Sha256Context();
-
+    Sha256Context(cssl::DIGEST_MODE mode);
     void clear();
 };
 
@@ -105,38 +87,26 @@ class Sha512Context : public ShaContext
 private:
     uint64_t msglen_[2] = {0, 0};
     uint8_t block_[kSha512BlockSizeBytes];
-    uint64_t h_[8] = {
-        0x6a09e667f3bcc908,
-        0xbb67ae8584caa73b,
-        0x3c6ef372fe94f82b,
-        0xa54ff53a5f1d36f1,
-        0x510e527fade682d1,
-        0x9b05688c2b3e6c1f,
-        0x1f83d9abfb41bd6b,
-        0x5be0cd19137e2179};
-
+    uint64_t h_[8];
 public:
-    Sha512Context();
+    Sha512Context(cssl::DIGEST_MODE mode);
     void clear();
 };
 
-class Sha384Context : public ShaContext
+class Sha3Context : public ShaContext
 {
 private:
-    uint64_t msglen_[2] = {0, 0};
-    uint8_t block_[kSha512BlockSizeBytes];
-    uint64_t h_[8] = {
-        0xcbbb9d5dc1059ed8,
-        0x629a292a367cd507,
-        0x9159015a3070dd17,
-        0x152fecd8f70e5939,
-        0x67332667ffc00b31,
-        0x8eb44a8768581511,
-        0xdb0c2e0d64f98fa7,
-        0x47b5481dbefa4fa4};
-
 public:
-    Sha384Context();
+    size_t digest_bytes_ = 0;
+    uint32_t r_ = 0;
+
+    union
+    {
+        uint8_t bytes[kSha3Words * 8];
+        uint64_t words[kSha3SpongeArr][kSha3SpongeArr];
+    } sponge_;
+
+    Sha3Context(cssl::DIGEST_MODE mode);
     void clear();
 };
 

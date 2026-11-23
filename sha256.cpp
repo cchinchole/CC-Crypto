@@ -1,45 +1,34 @@
 #include "internal/sha.hpp"
-#include <math.h>
+#include <cstdint>
+#include <cstring>
 
 #define SHA256_NUM_WORDS 16
 #define SHA256_ROUNDS 64
-#define SHA256_MASK 0x0000000f
 #define SHA256_LEN_BYTES sizeof(uint64_t)
 #define SHA256_ROTR(value, bits)                                               \
     (((value) >> (bits)) | ((value) << (sizeof(uint32_t) * 8 - (bits))))
-#define SHA256_SHR(value, bits) ((value) >> bits)
+#define SHA256_SHR(value, bits) ((value) >> (bits))
 
-uint32_t ch2(uint32_t x, uint32_t y, uint32_t z)
-{
-    return (x & y) ^ (~x & z);
-}
+#define SHA256_ROUND(t)                                                        \
+    do                                                                         \
+    {                                                                          \
+        if ((t) >= SHA256_NUM_WORDS)                                           \
+            W[(t)] = sigma1_256(W[(t) - 2]) + W[(t) - 7] +                     \
+                     sigma0_256(W[(t) - 15]) + W[(t) - 16];                    \
+        uint32_t tmp1 = h + summat1_256(e) + (uint32_t)sha_ch(e, f, g) +       \
+                        kSha256K[(t)] + W[(t)];                                \
+        uint32_t tmp2 = summat0_256(a) + (uint32_t)sha_maj(a, b, c);           \
+        h = g;                                                                 \
+        g = f;                                                                 \
+        f = e;                                                                 \
+        e = d + tmp1;                                                          \
+        d = c;                                                                 \
+        c = b;                                                                 \
+        b = a;                                                                 \
+        a = tmp1 + tmp2;                                                       \
+    } while (0)
 
-uint32_t maj2(uint32_t x, uint32_t y, uint32_t z)
-{
-    return (x & y) ^ (x & z) ^ (y & z);
-}
-
-uint32_t summat0_256(uint32_t x)
-{
-    return SHA256_ROTR(x, 2) ^ SHA256_ROTR(x, 13) ^ SHA256_ROTR(x, 22);
-}
-
-uint32_t summat1_256(uint32_t x)
-{
-    return SHA256_ROTR(x, 6) ^ SHA256_ROTR(x, 11) ^ SHA256_ROTR(x, 25);
-}
-
-uint32_t sigma0_256(uint32_t x)
-{
-    return SHA256_ROTR(x, 7) ^ SHA256_ROTR(x, 18) ^ SHA256_SHR(x, 3);
-}
-
-uint32_t sigma1_256(uint32_t x)
-{
-    return SHA256_ROTR(x, 17) ^ SHA256_ROTR(x, 19) ^ SHA256_SHR(x, 10);
-}
-
-uint32_t SHA256_k[SHA256_ROUNDS]{
+constexpr static uint32_t kSha256K[SHA256_ROUNDS] = {
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1,
     0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
     0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786,
@@ -52,26 +41,35 @@ uint32_t SHA256_k[SHA256_ROUNDS]{
     0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
     0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};
 
-int sha256_process(ShaContext *ctx)
+static uint32_t summat0_256(uint32_t x)
 {
-    /* Using circular queue schedular in accordance to FIPS 180-4 6.1.3 */
+    return SHA256_ROTR(x, 2) ^ SHA256_ROTR(x, 13) ^ SHA256_ROTR(x, 22);
+}
+
+static uint32_t summat1_256(uint32_t x)
+{
+    return SHA256_ROTR(x, 6) ^ SHA256_ROTR(x, 11) ^ SHA256_ROTR(x, 25);
+}
+
+static uint32_t sigma0_256(uint32_t x)
+{
+    return SHA256_ROTR(x, 7) ^ SHA256_ROTR(x, 18) ^ SHA256_SHR(x, 3);
+}
+
+static uint32_t sigma1_256(uint32_t x)
+{
+    return SHA256_ROTR(x, 17) ^ SHA256_ROTR(x, 19) ^ SHA256_SHR(x, 10);
+}
+
+static void sha256_process(uint32_t H[8], const uint8_t *block)
+{
+    /* Using the full message schedule in accordance to FIPS 180-4 6.2.2 */
     uint32_t W[SHA256_ROUNDS];
-    uint8_t *block = (uint8_t *)(ctx->pblock_);
-    uint32_t *H = (uint32_t *)(ctx->ph_);
 
-    /* Step 1: setup the message schedule */
+    /* Step 1: Preparing the message schedule; W[16] onwards is filled in by
+     * the round macro as each round needs it */
     for (int i = 0; i < SHA256_NUM_WORDS; i++)
-    {
-        const uint8_t *p = &block[i*sizeof(uint32_t)];
-        W[i] = ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) |
-+              ((uint32_t)p[2] << 8) | (uint32_t)p[3];
-    }
-
-    for (int i = 16; i < SHA256_ROUNDS; i++)
-    {
-        W[i] =
-            sigma1_256(W[i - 2]) + W[i - 7] + sigma0_256(W[i - 15]) + W[i - 16];
-    }
+        W[i] = sha_load_be32(block + i * sizeof(uint32_t));
 
     /* Step 2: Initialize working vars */
     uint32_t a = H[0];
@@ -82,25 +80,10 @@ int sha256_process(ShaContext *ctx)
     uint32_t f = H[5];
     uint32_t g = H[6];
     uint32_t h = H[7];
-    uint32_t tmp1 = 0;
-    uint32_t tmp2 = 0;
 
-    /* Step 3: Loop 63 rounds */
+    /* Step 3: 64 rounds */
     for (int t = 0; t < SHA256_ROUNDS; t++)
-    {
-        tmp1 = h + summat1_256(e) + ch2(e, f, g) + SHA256_k[t] + W[t];
-        tmp2 = summat0_256(a) + maj2(a, b, c);
-        h = g;
-        g = f;
-        f = e;
-        e = d + tmp1;
-        d = c;
-        c = b;
-        b = a;
-        a = tmp1 + tmp2;
-        // printf("[Round %d]: A: %08X B: %08X C: %08X D: %08X E: %08X \nF: %08X
-        // \nG: %08X \nH: %08X \n", t, a, b, c, d, e, f, g, h);
-    }
+        SHA256_ROUND(t);
 
     /* Step 4: compute intermediate hash value */
     H[0] += a;
@@ -111,73 +94,87 @@ int sha256_process(ShaContext *ctx)
     H[5] += f;
     H[6] += g;
     H[7] += h;
-    return 0;
 }
 
+/* Handles both SHA-224 and SHA-256; they only differ in H0 and digest size */
 int sha256_update(const uint8_t *msg, size_t byMsg_len, ShaContext *ctx)
 {
-    uint64_t *bMsg_len = ((uint64_t *)ctx->pmsg_len_);
-    uint8_t *block = (uint8_t *)(ctx->pblock_);
-    /* Make sure the bits are not exceeding 2^64 */
-    if (byMsg_len > (UINT64_MAX - *bMsg_len)/8)
+    if (ctx == NULL || (msg == NULL && byMsg_len != 0))
         return -1;
 
-    /* Clear the block with 0's then copy up to 64 bytes of a message into the
-     * block. If we hit 64 then process this message and continue. */
-    const uint8_t *src = (uint8_t *)msg;
-    *bMsg_len += (byMsg_len * 8);
-    while (byMsg_len--)
+    uint64_t *bMsg_len = (uint64_t *)ctx->pmsg_len_;
+    uint8_t *block = (uint8_t *)ctx->pblock_;
+    uint32_t *H = (uint32_t *)ctx->ph_;
+    const size_t block_len = get_block_length(ctx->mode_);
+
+    /* Make sure the bits are not exceeding 2^64 */
+    if (byMsg_len > (UINT64_MAX - *bMsg_len) / 8)
+        return -1;
+
+    if (byMsg_len == 0)
+        return 0;
+
+    const uint8_t *src = msg;
+    *bMsg_len += (uint64_t)byMsg_len * 8;
+
+    /* Finish a partially filled block first */
+    if (ctx->block_cursor_ > 0)
     {
-        block[ctx->block_cursor_++] = *src++;
-        if (ctx->block_cursor_ == get_block_length(ctx->mode_))
-        {
-            sha256_process(ctx);
-            ctx->block_cursor_ = 0;
-        }
+        size_t n = block_len - ctx->block_cursor_;
+        if (n > byMsg_len)
+            n = byMsg_len;
+        memcpy(block + ctx->block_cursor_, src, n);
+        ctx->block_cursor_ += n;
+        src += n;
+        byMsg_len -= n;
+        if (ctx->block_cursor_ < block_len)
+            return 0;
+        sha256_process(H, block);
+        ctx->block_cursor_ = 0;
     }
+
+    /* Whole blocks are compressed straight from the caller's buffer */
+    for (; byMsg_len >= block_len; src += block_len, byMsg_len -= block_len)
+        sha256_process(H, src);
+
+    /* Buffer the tail for the next update/digest */
+    memcpy(block, src, byMsg_len);
+    ctx->block_cursor_ = byMsg_len;
     return 0;
 }
 
 int sha256_digest(uint8_t *digest_out, ShaContext *ctx)
 {
+    if (digest_out == NULL || ctx == NULL)
+        return -1;
 
-    uint8_t *block = (uint8_t *)(ctx->pblock_);
-    uint32_t *H = (uint32_t *)(ctx->ph_);
+    uint64_t *bMsg_len = (uint64_t *)ctx->pmsg_len_;
+    uint8_t *block = (uint8_t *)ctx->pblock_;
+    uint32_t *H = (uint32_t *)ctx->ph_;
+    const size_t block_len = get_block_length(ctx->mode_);
+    size_t cursor = ctx->block_cursor_;
 
     /* Set the first bit to 1 (0b10000000) */
-    block[ctx->block_cursor_++] = 0x80;
+    block[cursor++] = 0x80;
 
-    if (get_block_length(ctx->mode_) - ctx->block_cursor_ > 0)
-        memset(block + ctx->block_cursor_, 0,
-               get_block_length(ctx->mode_) - ctx->block_cursor_);
-
-    /* Check if we can fit the message length into current block if not then
-     * process a new block */
-    if (ctx->block_cursor_ > (get_block_length(ctx->mode_) - sizeof(uint64_t)))
+    /* If the 64-bit message length no longer fits, pad out the remaining block
+     * and process it first */
+    if (cursor > block_len - SHA256_LEN_BYTES)
     {
-        sha256_process(ctx);
-        ctx->block_cursor_ = 0;
-        memset(block, 0, get_block_length(ctx->mode_));
-    }
-    uint64_t nSize = *((uint32_t *)ctx->pmsg_len_);
-
-    for (int i = 1; i <= 8; i++)
-    {
-        /* Will pull the last byte of the size then remove it */
-        block[get_block_length(ctx->mode_) - i] = (uint8_t)(nSize&0xFF);
-        nSize >>= 8;
+        memset(block + cursor, 0, block_len - cursor);
+        sha256_process(H, block);
+        cursor = 0;
     }
 
-    /* The final message with the length to process */
-    sha256_process(ctx);
+    /* Zero until the length field, then append the bit length */
+    memset(block + cursor, 0, block_len - SHA256_LEN_BYTES - cursor);
+    sha_store_be64(block + block_len - SHA256_LEN_BYTES, *bMsg_len);
+
+    /* Process the final message */
+    sha256_process(H, block);
     ctx->block_cursor_ = 0;
 
-    for (int i = 0; i < get_return_length(ctx->mode_) / sizeof(H[i]); i++)
-    {
-        *(digest_out++) = H[i] >> 24;
-        *(digest_out++) = H[i] >> 16;
-        *(digest_out++) = H[i] >> 8;
-        *(digest_out++) = H[i];
-    }
+    for (size_t i = 0; i < get_return_length(ctx->mode_) / sizeof(uint32_t); i++)
+        sha_store_be32(digest_out + i * sizeof(uint32_t), H[i]);
     return 0;
 }

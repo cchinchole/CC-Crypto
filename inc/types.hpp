@@ -4,6 +4,8 @@ enum class DIGEST_MODE {
     SHA_1,
     SHA_224,
     SHA_256,
+    SHA_512_224,
+    SHA_512_256,
     SHA_384,
     SHA_512,
     SHA_3_224,
