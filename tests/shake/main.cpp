@@ -87,7 +87,7 @@ SHARsp parseFile(const std::string &filename)
 int test_Shake(ByteArray msg, size_t inputLen, ByteArray MD, cc::crypto::DIGEST_MODE mode,
                size_t digestSize, bool quiet)
 {
-    ByteArray rawDigest = cc::crypto::Hasher::xof(msg, digestSize, mode);
+    ByteArray rawDigest = cc::crypto::Hasher::xof_digest(msg, digestSize, mode);
     int res = (memcmp(rawDigest.data(), MD.data(), MD.size()));
     if (!quiet)
         if (res != 0)

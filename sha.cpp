@@ -42,8 +42,6 @@ Sha3Context::Sha3Context(cc::crypto::DIGEST_MODE mode)
         this->digest_bytes_ = 0;
         break;
     }
-    memset(&sponge_, 0, sizeof(sponge_));
-    this->block_cursor_ = 0;
     switch (mode) {
     case cc::crypto::DIGEST_MODE::SHA_3_SHAKE_128:
         r_ = 1344 / 8;
@@ -58,6 +56,7 @@ Sha3Context::Sha3Context(cc::crypto::DIGEST_MODE mode)
     this->ph_ = nullptr;
     this->pmsg_len_ = nullptr;
     this->pblock_ = nullptr;
+    this->clear();
 }
 
 void sha3_shake_digest_bytes(ShaContext *ctx_raw, size_t digestBytes)
@@ -68,7 +67,7 @@ void sha3_shake_digest_bytes(ShaContext *ctx_raw, size_t digestBytes)
 
 void Sha3Context::clear()
 {
-    memset(&this->sponge_, 0, sizeof(this->sponge_));
+    memset(&lanes_, 0, sizeof(lanes_));
     this->block_cursor_ = 0;
 }
 

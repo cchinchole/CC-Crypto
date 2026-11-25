@@ -15,7 +15,7 @@ int main()
     //Example using update + SHAKE
     cc::crypto::Hasher h(cc::crypto::DIGEST_MODE::SHA_3_SHAKE_128);
     h.update(msg);
-    PRINT("Shake 72 bytes: {}", h.xof(72));
+    PRINT("Shake 72 bytes: {}", h.xof_digest(72));
 
     return 0;
 }

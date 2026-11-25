@@ -24,9 +24,9 @@ public:
     Hasher &update(const std::unique_ptr<uint8_t[]> &data, size_t length);
 
     ByteArray digest();
-    ByteArray xof(size_t length);
+    ByteArray xof_digest(size_t length);
     static ByteArray hash(ByteSpan data, DIGEST_MODE mode);
-    static ByteArray xof(ByteSpan data, size_t digest_length_bytes, DIGEST_MODE mode);
+    static ByteArray xof_digest(ByteSpan data, size_t digest_length_bytes, DIGEST_MODE mode);
     static ByteArray hmac(ByteSpan data, ByteSpan key, DIGEST_MODE mode);
 
     size_t return_length();

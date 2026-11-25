@@ -68,7 +68,7 @@ public:
         return result;
     }
 
-    ByteArray xof(size_t length)
+    ByteArray xof_digest(size_t length)
     {
         if (mode_ != DIGEST_MODE::SHA_3_SHAKE_128 &&
             mode_ != DIGEST_MODE::SHA_3_SHAKE_256)
@@ -80,8 +80,6 @@ public:
             reset();
         }
         ByteArray result(length);
-        sha3_shake_digest_bytes(ctx_, length);
-        sha3_xof(ctx_);
         sha3_shake_digest(result.data(), length, ctx_);
         finalized_ = true;
         return result;
@@ -124,7 +122,7 @@ Hasher &Hasher::update(const std::unique_ptr<uint8_t[]> &data, size_t length)
 
 ByteArray Hasher::digest() { return pimpl_->digest(); }
 
-ByteArray Hasher::xof(size_t length) { return pimpl_->xof(length); }
+ByteArray Hasher::xof_digest(size_t length) { return pimpl_->xof_digest(length); }
 
 ByteArray Hasher::hash(ByteSpan data, DIGEST_MODE mode)
 {
@@ -133,11 +131,11 @@ ByteArray Hasher::hash(ByteSpan data, DIGEST_MODE mode)
     return hasher.digest();
 }
 
-ByteArray Hasher::xof(ByteSpan data, size_t digest_length_bytes, DIGEST_MODE mode)
+ByteArray Hasher::xof_digest(ByteSpan data, size_t digest_length_bytes, DIGEST_MODE mode)
 {
     Hasher hasher(mode);
     hasher.update(data);
-    return hasher.xof(digest_length_bytes);
+    return hasher.xof_digest(digest_length_bytes);
 }
 
 ByteArray Hasher::hmac(ByteSpan data, ByteSpan key, DIGEST_MODE mode)
