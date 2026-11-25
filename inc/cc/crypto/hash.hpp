@@ -6,7 +6,7 @@
 namespace cc::crypto
 {
 
-class Hasher
+class CC_CRYPTO_API Hasher
 {
 private:
     class Impl;

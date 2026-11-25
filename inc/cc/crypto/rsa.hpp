@@ -4,7 +4,7 @@
 #include "types.hpp"
 
 namespace cc::crypto {
-class Rsa {
+class CC_CRYPTO_API Rsa {
     private:
         struct Impl;
         Impl *pimpl_;

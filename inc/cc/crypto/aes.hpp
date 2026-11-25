@@ -4,7 +4,7 @@
 #include <memory>
 
 namespace cc::crypto {
-class Aes {
+class CC_CRYPTO_API Aes {
 private:
     struct Impl;
     AES_MODE mode_;

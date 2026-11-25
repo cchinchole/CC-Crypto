@@ -2,7 +2,7 @@
 #include "cc/crypto/primes.hpp"
 #include "cc/crypto/utils/bytes.hpp"
 #include "cc/crypto/utils/logger.hpp"
-#include "cc/crypto/utils/time.hpp"
+#include "internal/time.hpp"
 #include "cc/crypto/hash.hpp"
 #include <openssl/bn.h>
 #include <openssl/rand.h>

@@ -111,7 +111,7 @@ Note: you can use the global include header <cc/crypto.hpp> or include the modul
 
 ## Libraries Used ##
 - [OpenSSL](https://github.com/openssl/openssl) - Cryptographic library for secure communication.
-- [nlohmann/json](https://github.com/nlohmann/json) - Header-only JSON library for C++.
+- [nlohmann/json](https://github.com/nlohmann/json) - Header-only JSON library for C++ (tests only, vendored in `tests/common/json.hpp`).
 
 ## Breaking Changes ##
 ```

@@ -6,7 +6,7 @@
 #include <utility>
 
 namespace cc::crypto {
-class EcSignature {
+class CC_CRYPTO_API EcSignature {
     friend class Ec;
 public:
     static EcSignature from(const std::string &hexR, const std::string &hexS);
@@ -23,7 +23,7 @@ private:
     std::unique_ptr<Impl> pimpl_;
 };
 
-class Ec {
+class CC_CRYPTO_API Ec {
 public:
     Ec(const Ec &) = delete;
     Ec &operator=(const Ec &) = delete;

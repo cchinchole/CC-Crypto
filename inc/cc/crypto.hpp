@@ -1,4 +1,5 @@
 #pragma once
+#include "crypto/export.hpp"
 #include "crypto/types.hpp"
 #include "crypto/utils/bytes.hpp"
 #include "crypto/utils/logger.hpp"

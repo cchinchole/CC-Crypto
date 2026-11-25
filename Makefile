@@ -4,6 +4,8 @@ OPT_LEVEL = 3
 CXX = g++
 CXXFLAGS = -std=c++23 -g -O$(OPT_LEVEL) -DDEBUG=$(DEBUG) -fdiagnostics-color=always -Iinc
 LDFLAGS =
+# Only symbols tagged CC_CRYPTO_API (inc/cc/crypto/export.hpp) are exported
+VISIBILITY_FLAGS = -fvisibility=hidden -fvisibility-inlines-hidden
 
 
 # Use pkg-config to get OpenSSL flags
@@ -52,10 +54,10 @@ $(STATIC_LIB): $(OBJS) $(OBJS2)
 	ar rcs $@ $^
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -fPIC -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(VISIBILITY_FLAGS) -fPIC -c $< -o $@
 
 $(BUILD_DIR)/i%.o: $(SRC_INTERNAL_DIR)/%.cpp | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -fPIC -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(VISIBILITY_FLAGS) -fPIC -c $< -o $@
 
 examples:
 	$(MAKE) -C $(EXAMPLES_DIR)
@@ -88,4 +90,4 @@ test: all
 		$(MAKE) -C $$dir run; \
 	done
 
-PHONY: all examples clean install uninstall test
+.PHONY: all examples clean install uninstall test
