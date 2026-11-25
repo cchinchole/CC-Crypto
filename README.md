@@ -112,3 +112,9 @@ Note: you can use the global include header <cc/crypto.hpp> or include the modul
 ## Libraries Used ##
 - [OpenSSL](https://github.com/openssl/openssl) - Cryptographic library for secure communication.
 - [nlohmann/json](https://github.com/nlohmann/json) - Header-only JSON library for C++.
+
+## Breaking Changes ##
+```
+2026/11/24: https://github.com/cchinchole/CC-Crypto/commit/6e46b2e9b8b3b019dc06ae277639f11d791d0eac -- Hash::xof -> xof_digest
+2026/11/22: https://github.com/cchinchole/CC-Crypto/commit/d34ed635f846f2633bf7476a4e69357d36d95c83 -- Namespacing changed from cssl:: to cc::crypto::
+```
