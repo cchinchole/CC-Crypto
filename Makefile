@@ -59,7 +59,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 $(BUILD_DIR)/i%.o: $(SRC_INTERNAL_DIR)/%.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(VISIBILITY_FLAGS) -fPIC -c $< -o $@
 
-examples:
+examples: $(STATIC_LIB)
 	$(MAKE) -C $(EXAMPLES_DIR)
 
 clean:
