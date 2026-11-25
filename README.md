@@ -96,7 +96,7 @@ Note: you can use the global include header <cc/crypto.hpp> or include the modul
     //Example using update + SHAKE
     cc::crypto::Hasher h(cc::crypto::DIGEST_MODE::SHA_3_SHAKE_128);
     h.update(msg);
-    ByteArray hash = h.xof(72); //72 being the amount of bytes to output.
+    ByteArray hash = h.xof_digest(72); //72 being the amount of bytes to output.
 ```
 ### Building an application ###
 ```
